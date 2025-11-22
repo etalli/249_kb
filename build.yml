@@ -1,4 +1,4 @@
-name: Build ZMK firmware
+name: Build ZMK Firmware
 
 on:
   push:
@@ -7,7 +7,27 @@ on:
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build.yml@main
-    with:
-      board: seeeduino_xiao_ble
-      shield: xiao60
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Install west
+        run: pip3 install west
+
+      - name: Initialize west
+        run: west init -l zmk/app
+
+      - name: Update modules
+        run: west update
+
+      - name: Build firmware
+        run: west build -s zmk/app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: build/zephyr/zmk.uf2
