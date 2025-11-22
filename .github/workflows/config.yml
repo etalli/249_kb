@@ -14,11 +14,11 @@ jobs:
       image: zmkfirmware/zmk-build-arm:stable
 
     steps:
-      - name: Checkout User Config
+      - name: Checkout User Config (Source)
         # あなたの設定ファイルが入っているリポジトリをダウンロード
         uses: actions/checkout@v3
         with:
-          path: config_repo # ダウンロード先を 'config_repo' ディレクトリに指定
+          path: config_source # ダウンロード先を 'config_source' ディレクトリに指定 (config/ フォルダを含む)
 
       - name: Clone ZMK Repo
         # ZMK本体のリポジトリをダウンロードし、作業ディレクトリをZMK本体に移動
@@ -28,17 +28,21 @@ jobs:
           west init -l app/
           west update
 
-      - name: Build firmware (use absolute path for ZMK_CONFIG)
+      - name: Copy User Files to ZMK Repo
+        # あなたのカスタム設定ファイル一式を、ZMKリポジトリ内の正しい場所へコピー
+        # ZMKはシールドを 'app/boards/shields/' 内で探す
         run: |
-          # 1. 'config_repo/config' への絶対パスを取得
-          CONFIG_PATH=$(realpath config_repo/config)
-          
-          # 2. ZMKリポジトリ内 (zmk_repo) でビルドコマンドを実行
+          mkdir -p zmk_repo/app/boards/shields/xiao60
+          cp config_source/config/xiao60.* zmk_repo/app/boards/shields/xiao60/
+          cp config_source/config/Kconfig.* zmk_repo/app/boards/shields/xiao60/
+
+      - name: Build firmware
+        # コピー後のファイル構造に基づいてビルド
+        # -DZMK_CONFIG の指定は不要
+        run: |
           cd zmk_repo
-          west build -s app -b seeeduino_xiao_ble -- \
-          -DSHIELD=xiao60 \
-          -DZMK_CONFIG="${CONFIG_PATH}" # ⬅️ 絶対パスを使用
-          # -DZMK_EXTRA_MODULES は削除
+          # ZMKはコピーされたファイル構造を認識し、シールドを見つける
+          west build -s app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
 
       - name: Upload firmware
         # ビルドされたファームウェア (zmk.uf2) をアーティファクトとしてアップロード
