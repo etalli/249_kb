@@ -1,0 +1,23 @@
+name: Build ZMK Firmware
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    # 公式のZMKビルドアクションを使用します
+    uses: zmkfirmware/zmk-github-action/.github/workflows/build-user-config.yml@main
+    with:
+      # ボード（マイコン）とシールド（キーボード定義）を指定します
+      targets: |
+        board: seeeduino_xiao_ble
+        shield: xiao60
+
+    secrets:
+      # このシークレットは必須ですが、カスタムモジュールを使用しない場合は空の文字列でも構いません。
+      # GitHubリポジトリに 'BOT_TOKEN' という名前のシークレットを作成する必要があります。
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
