@@ -1,17 +1,42 @@
-name: Build ZMK firmware
+name: Build ZMK Firmware
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
   workflow_dispatch:
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build.yml@main
-    with:
-      board: seeeduino_xiao_ble
-      shield: xiao60
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout zmk-config
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y wget python3 python3-pip ninja-build git cmake
+
+      - name: Get ZMK source
+        run: |
+          git clone https://github.com/zmkfirmware/zmk.git --depth=1
+          pip3 install -r zmk/app/requirements.txt
+
+      - name: Initialize West
+        run: |
+          west init -l zmk/app
+          west update
+
+      - name: Build firmware
+        run: |
+          west build -s zmk/app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
+          ls -R build
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware
+          path: build/zephyr/zmk.*
+
