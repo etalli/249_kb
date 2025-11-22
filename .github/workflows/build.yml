@@ -30,17 +30,30 @@ jobs:
           sudo mv zephyr-sdk-0.16.5 /opt/zephyr-sdk
           /opt/zephyr-sdk/setup.sh -t all -c
 
-      - name: Get ZMK source
+      - name: Clone ZMK
         run: |
           git clone https://github.com/zmkfirmware/zmk.git --depth=1
 
-      - name: Initialize West (correct directory)
+      - name: Add config repository to ZMK manifest
+        working-directory: zmk
+        run: |
+          echo "manifest:" > west.yml
+          echo "  remotes:" >> west.yml
+          echo "    - name: zmk-config-local" >> west.yml
+          echo "      url-base: https://github.com/etalli/249_kb" >> west.yml
+          echo "  projects:" >> west.yml
+          echo "    - name: config" >> west.yml
+          echo "      remote: zmk-config-local" >> west.yml
+          echo "      revision: main" >> west.yml
+          echo "      import: config" >> west.yml
+
+      - name: Initialize West (with config module)
         working-directory: zmk
         run: |
           west init -l app
           west update
 
-      - name: Build firmware (correct directory)
+      - name: Build firmware
         working-directory: zmk
         run: |
           west build -s app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
