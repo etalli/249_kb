@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Checkout User Config
         # あなたの設定ファイルが入っているリポジトリをダウンロード
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           path: config_repo # ダウンロード先を 'config_repo' ディレクトリに指定
 
@@ -30,12 +30,12 @@ jobs:
 
       - name: Build firmware
         # ZMKリポジトリ内 (zmk_repo) でビルドコマンドを実行
-        # -DZMK_CONFIG であなたの設定ファイルがあるパスを指定
         run: |
           cd zmk_repo
           west build -s app -b seeeduino_xiao_ble -- \
           -DSHIELD=xiao60 \
-          -DZMK_CONFIG=../config_repo/config
+          -DZMK_CONFIG=../config_repo/config \
+          -DZMK_EXTRA_MODULES=../config_repo # 修正点
 
       - name: Upload firmware
         # ビルドされたファームウェア (zmk.uf2) をアーティファクトとしてアップロード
