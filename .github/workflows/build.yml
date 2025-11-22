@@ -34,18 +34,20 @@ jobs:
         run: |
           git clone https://github.com/zmkfirmware/zmk.git --depth=1
 
-      - name: Initialize West
+      - name: Initialize West (correct directory)
+        working-directory: zmk
         run: |
-          west init -l zmk/app
+          west init -l app
           west update
 
-      - name: Build firmware
+      - name: Build firmware (correct directory)
+        working-directory: zmk
         run: |
-          west build -s zmk/app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
+          west build -s app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
           ls -R build
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware
-          path: build/zephyr/zmk.*
+          path: zmk/build/zephyr/zmk.*
