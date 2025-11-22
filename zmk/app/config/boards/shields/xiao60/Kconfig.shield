@@ -1,3 +1,4 @@
 # xiao60 shield Kconfig
 config SHIELD_XIAO60
-    def_bool $(shields_list_contains,xiao60)
+    bool "xiao60"
+

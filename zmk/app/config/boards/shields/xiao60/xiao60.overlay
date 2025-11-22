@@ -1,6 +1,7 @@
 / {
     chosen {
-        zmk,kscan = &kscan0;
+        zmk,keyboard = &kscan0; 
+
     };
 
     kscan0: kscan {
