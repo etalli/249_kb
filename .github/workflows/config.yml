@@ -8,16 +8,34 @@ on:
 
 jobs:
   build:
-    # 公式のZMKビルドアクションを使用します
-    uses: zmkfirmware/zmk-github-action/.github/workflows/build-user-config.yml@main
-    with:
-      # ボード（マイコン）とシールド（キーボード定義）を指定します
-      targets: |
-        board: seeeduino_xiao_ble
-        shield: xiao60
+    runs-on: ubuntu-latest
+    container:
+      # ZMKビルドに必要なツールチェーンと環境が揃ったコンテナイメージを使用
+      image: zmkfirmware/zmk-build-arm:stable
 
-    secrets:
-      # このシークレットは必須ですが、カスタムモジュールを使用しない場合は空の文字列でも構いません。
-      # GitHubリポジトリに 'BOT_TOKEN' という名前のシークレットを作成する必要があります。
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+    steps:
+      - name: Checkout
+        # サブモジュールを含めてコードを取得
+        uses: actions/checkout@v3
+        with:
+          submodules: true
 
+      - name: Initialize west
+        # westを初期化
+        run: west init -l zmk/app
+
+      - name: Update modules
+        # モジュールを更新（ZMK本体と依存関係を取得）
+        run: west update
+
+      - name: Build firmware
+        # ビルドコマンドを実行
+        # -DSHIELD=xiao60 と -DCONF_FILE=config/xiao60.conf を指定
+        run: west build -s zmk/app -b seeeduino_xiao_ble -- -DSHIELD=xiao60 -DCONF_FILE=config/xiao60.conf
+
+      - name: Upload firmware
+        # ビルドされたファームウェア (zmk.uf2) をアーティファクトとしてアップロード
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware_xiao60
+          path: build/zephyr/zmk.uf2
