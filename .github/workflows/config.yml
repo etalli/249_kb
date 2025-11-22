@@ -10,32 +10,36 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      # ZMKビルドに必要なツールチェーンと環境が揃ったコンテナイメージを使用
+      # ZMKビルド環境を使用
       image: zmkfirmware/zmk-build-arm:stable
 
     steps:
-      - name: Checkout
-        # サブモジュールを含めてコードを取得
-        uses: actions/checkout@v3
+      - name: Checkout User Config
+        # あなたの設定ファイルが入っているリポジトリをダウンロード
+        uses: actions/checkout@v4
         with:
-          submodules: true
+          path: config_repo # ダウンロード先を 'config_repo' ディレクトリに指定
 
-      - name: Initialize west
-        # westを初期化
-        run: west init -l zmk/app
-
-      - name: Update modules
-        # モジュールを更新（ZMK本体と依存関係を取得）
-        run: west update
+      - name: Clone ZMK Repo
+        # ZMK本体のリポジトリをダウンロードし、作業ディレクトリをZMK本体に移動
+        run: |
+          git clone https://github.com/zmkfirmware/zmk.git zmk_repo
+          cd zmk_repo
+          west init -l app/
+          west update
 
       - name: Build firmware
-        # ビルドコマンドを実行
-        # -DSHIELD=xiao60 と -DCONF_FILE=config/xiao60.conf を指定
-        run: west build -s zmk/app -b seeeduino_xiao_ble -- -DSHIELD=xiao60 -DCONF_FILE=config/xiao60.conf
+        # ZMKリポジトリ内 (zmk_repo) でビルドコマンドを実行
+        # -DZMK_CONFIG であなたの設定ファイルがあるパスを指定
+        run: |
+          cd zmk_repo
+          west build -s app -b seeeduino_xiao_ble -- \
+          -DSHIELD=xiao60 \
+          -DZMK_CONFIG=../config_repo/config
 
       - name: Upload firmware
         # ビルドされたファームウェア (zmk.uf2) をアーティファクトとしてアップロード
         uses: actions/upload-artifact@v4
         with:
           name: firmware_xiao60
-          path: build/zephyr/zmk.uf2
+          path: zmk_repo/build/zephyr/zmk.uf2
