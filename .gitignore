@@ -1,0 +1,7 @@
+.DS_Store
+doc/2025-11-22-1444_zmk_xiao60_config.zip
+doc/zmk_config_template.zip
+KiCAD/fp-info-cache
+KiCAD/fp-lib-table
+/KiCAD/mykeyboard-backups
+KiCAD/sym-lib-table

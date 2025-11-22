@@ -1,0 +1,43 @@
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        diode-direction = "ROW2COL";
+
+        row-gpios = <
+            &gpio0 2  (GPIO_ACTIVE_LOW)   /* ROW0 = P0.02 (Pin1) */
+            &gpio0 3  (GPIO_ACTIVE_LOW)   /* ROW1 = P0.03 (Pin2) */
+            &gpio0 28 (GPIO_ACTIVE_LOW)   /* ROW2 = P0.28 (Pin3) */
+            &gpio0 29 (GPIO_ACTIVE_LOW)   /* ROW3 = P0.29 (Pin4) */
+            &gpio0 4  (GPIO_ACTIVE_LOW)   /* ROW4 = P0.04 (Pin5) */
+        >;
+
+        col-gpios = <
+            &gpio0 5  (GPIO_ACTIVE_LOW)   /* COL0 = P0.05 (Pin6) */
+            &gpio1 11 (GPIO_ACTIVE_LOW)   /* COL1 = P1.11 (Pin7) */
+            &gpio1 12 (GPIO_ACTIVE_LOW)   /* COL2 = P1.12 (Pin8) */
+            &gpio1 13 (GPIO_ACTIVE_LOW)   /* COL3 = P1.13 (Pin9) */
+            &gpio1 14 (GPIO_ACTIVE_LOW)   /* COL4 = P1.14 (Pin10) */
+            &gpio1 15 (GPIO_ACTIVE_LOW)   /* COL5 = P1.15 (Pin11) */
+
+            &gpio0 15 (GPIO_ACTIVE_LOW)   /* COL6  = P0.15 (Pin15) */
+            &gpio0 19 (GPIO_ACTIVE_LOW)   /* COL7  = P0.19 (Pin16) */
+            &gpio1 1  (GPIO_ACTIVE_LOW)   /* COL8  = P1.01 (Pin17) */
+            &gpio0 9  (GPIO_ACTIVE_LOW)   /* COL9  = P0.09 (Pin18) */
+            &gpio0 10 (GPIO_ACTIVE_LOW)   /* COL10 = P0.10 (Pin19) */
+            &gpio0 31 (GPIO_ACTIVE_LOW)   /* COL11 = P0.31 (Pin20) */
+        >;
+    };
+
+    leds {
+        compatible = "gpio-leds";
+
+        layer_led: layer_led_0 {
+            gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;   /* P1.03 (Pin21) */
+            label = "Layer LED";
+        };
+    };
+};

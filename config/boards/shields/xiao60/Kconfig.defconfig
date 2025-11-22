@@ -1,0 +1,5 @@
+# Default keyboard name for xiao60
+if SHIELD_XIAO60
+config ZMK_KEYBOARD_NAME
+    default "xiao60"
+endif

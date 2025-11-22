@@ -1,0 +1,27 @@
+name: Build ZMK firmware
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout zmk-config
+        uses: actions/checkout@v4
+
+      - name: Initialize ZMK
+        uses: zmkfirmware/zmk@main
+        with:
+          board: seeeduino_xiao_ble
+          shield: xiao60
+
+      - name: Build firmware
+        uses: zmkfirmware/zmk@main
+        with:
+          board: seeeduino_xiao_ble
+          shield: xiao60
