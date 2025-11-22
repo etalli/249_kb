@@ -22,7 +22,7 @@ jobs:
       - name: Get ZMK source
         run: |
           git clone https://github.com/zmkfirmware/zmk.git --depth=1
-          pip3 install -r zmk/app/requirements.txt
+          pip3 install -r zmk/app/requirements.txt || pip3 install -r app/requirements.txt
 
       - name: Initialize West
         run: |
