@@ -8,58 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # 公式のZMKビルドアクションを使用します
+    uses: zmkfirmware/zmk-github-action/.github/workflows/build-user-config.yml@main
+    with:
+      # ボード（マイコン）とシールド（キーボード定義）を指定します
+      targets: |
+        board: seeeduino_xiao_ble
+        shield: xiao60
 
-    steps:
-      - name: Checkout zmk-config
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git wget xz-utils file cmake ninja-build python3 python3-pip
-          pip3 install west
-
-      - name: Install Zephyr SDK
-        run: |
-          wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.5/zephyr-sdk-0.16.5_linux-x86_64.tar.xz
-          tar xf zephyr-sdk-0.16.5_linux-x86_64.tar.xz
-          sudo mv zephyr-sdk-0.16.5 /opt/zephyr-sdk
-          /opt/zephyr-sdk/setup.sh -t all -c
-
-      - name: Clone ZMK
-        run: |
-          git clone https://github.com/zmkfirmware/zmk.git --depth=1
-
-      - name: Create west manifest including your config
-        working-directory: zmk
-        run: |
-          cat << 'EOF' > west.yml
-          manifest:
-            remotes:
-              - name: config-local
-                url-base: https://github.com/etalli/249_kb
-            projects:
-              - name: config
-                remote: config-local
-                revision: main
-                import: config
-          EOF
-
-      - name: West init & update
-        working-directory: zmk
-        run: |
-          west init -l app
-          west update
-
-      - name: Build firmware
-        working-directory: zmk
-        run: |
-          west build -s app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
-          ls -R build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware
-          path: zmk/build/zephyr/zmk.*
+    secrets:
+      # このシークレットは必須ですが、カスタムモジュールを使用しない場合は空の文字列でも構いません。
+      # GitHubリポジトリに 'BOT_TOKEN' という名前のシークレットを作成する必要があります。
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
