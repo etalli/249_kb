@@ -28,14 +28,17 @@ jobs:
           west init -l app/
           west update
 
-      - name: Build firmware
-        # ZMKリポジトリ内 (zmk_repo) でビルドコマンドを実行
+      - name: Build firmware (use absolute path for ZMK_CONFIG)
         run: |
+          # 1. 'config_repo/config' への絶対パスを取得
+          CONFIG_PATH=$(realpath config_repo/config)
+          
+          # 2. ZMKリポジトリ内 (zmk_repo) でビルドコマンドを実行
           cd zmk_repo
           west build -s app -b seeeduino_xiao_ble -- \
           -DSHIELD=xiao60 \
-          -DZMK_CONFIG=../config_repo/config \
-          -DZMK_EXTRA_MODULES=../config_repo # 修正点
+          -DZMK_CONFIG="${CONFIG_PATH}" # ⬅️ 絶対パスを使用
+          # -DZMK_EXTRA_MODULES は削除
 
       - name: Upload firmware
         # ビルドされたファームウェア (zmk.uf2) をアーティファクトとしてアップロード
