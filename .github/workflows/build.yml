@@ -14,13 +14,10 @@ jobs:
       - name: Checkout zmk-config
         uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y git wget xz-utils file cmake ninja-build python3 python3-pip
-
-      - name: Install West
-        run: |
           pip3 install west
 
       - name: Install Zephyr SDK
@@ -34,20 +31,22 @@ jobs:
         run: |
           git clone https://github.com/zmkfirmware/zmk.git --depth=1
 
-      - name: Add config repository to ZMK manifest
+      - name: Create west manifest including your config
         working-directory: zmk
         run: |
-          echo "manifest:" > west.yml
-          echo "  remotes:" >> west.yml
-          echo "    - name: zmk-config-local" >> west.yml
-          echo "      url-base: https://github.com/etalli/249_kb" >> west.yml
-          echo "  projects:" >> west.yml
-          echo "    - name: config" >> west.yml
-          echo "      remote: zmk-config-local" >> west.yml
-          echo "      revision: main" >> west.yml
-          echo "      import: config" >> west.yml
+          cat << 'EOF' > west.yml
+          manifest:
+            remotes:
+              - name: config-local
+                url-base: https://github.com/etalli/249_kb
+            projects:
+              - name: config
+                remote: config-local
+                revision: main
+                import: config
+          EOF
 
-      - name: Initialize West (with config module)
+      - name: West init & update
         working-directory: zmk
         run: |
           west init -l app
@@ -59,7 +58,7 @@ jobs:
           west build -s app -b seeeduino_xiao_ble -- -DSHIELD=xiao60
           ls -R build
 
-      - name: Upload firmware artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: firmware
