@@ -1,4 +1,3 @@
 # xiao60 shield Kconfig
 config SHIELD_XIAO60
     bool "xiao60"
-
